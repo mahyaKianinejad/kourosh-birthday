@@ -2,45 +2,56 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080a10">
-<title>Kourosh | Birthday Celebration</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080a12">
+<title>Kourosh's Birthday — Hosted by Merat</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080a10}
-body{display:grid;place-items:center;background:radial-gradient(ellipse at center,#201b25 0%,#080a10 75%)}
-.stage{width:100vw;height:100vh;height:100dvh;display:grid;place-items:center;overflow:hidden}
-.poster{position:relative;width:min(100vw,66.6667dvh);aspect-ratio:2/3;max-height:100dvh;overflow:hidden}
-.poster>img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:fill}
-.head-hover{position:absolute;left:38%;top:16%;width:25%;height:16%;border:0;background:transparent;padding:0;cursor:pointer;outline:none}
-.hearts{position:absolute;inset:-12%;display:flex;align-items:center;justify-content:center;gap:5%;opacity:0;pointer-events:none;transition:opacity .2s ease}
-.head-hover:hover .hearts,.head-hover:focus-visible .hearts,.head-hover.active .hearts{opacity:1}
-.heart{font:clamp(24px,5.5vh,54px)/1 Arial,sans-serif;color:#ff4775;text-shadow:0 0 12px #ff174f,0 0 28px #ff174f;animation:pulse .65s ease-in-out infinite alternate}
-.heart:nth-child(2){font-size:clamp(18px,4vh,40px);animation-delay:.12s}
-.heart:nth-child(3){font-size:clamp(20px,4.5vh,46px);animation-delay:.24s}
-@keyframes pulse{to{transform:scale(1.25)}}
-.map-link{position:absolute;left:20%;top:73%;width:62%;height:8%;display:block;background:transparent;border-radius:10px;cursor:pointer}
-@media(prefers-reduced-motion:reduce){.heart{animation:none}.hearts{transition:none}}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{background:radial-gradient(ellipse at center,#211a20 0,#090a11 72%);display:grid;place-items:center;color:#f8e7c1}
+.stage{position:relative;width:min(100vw,66.6667vh);height:min(100vh,150vw);display:grid;place-items:center;isolation:isolate}
+.poster{display:block;width:100%;height:100%;object-fit:contain;transform:translateZ(0);transition:transform .9s cubic-bezier(.2,.8,.2,1),filter .9s ease;filter:drop-shadow(0 12px 40px #000b);user-select:none;-webkit-user-drag:none}
+.stage.is-active .poster{transform:scale(1.025) translateY(-3px);filter:drop-shadow(0 18px 52px #000d) brightness(1.055)}
+.portrait-hotspot{position:absolute;left:18%;top:16%;width:65%;height:46%;z-index:3;cursor:pointer;border-radius:32%}
+.map-hotspot{position:absolute;left:20%;top:73%;width:62%;height:9%;z-index:4;display:block}
+.heart{position:fixed;z-index:5;left:var(--x);top:var(--y);font:var(--size)/1 Arial,sans-serif;color:#ff416b;text-shadow:0 0 9px #ff174f,0 0 22px #ff174f;pointer-events:none;opacity:0;animation:float var(--dur) ease-out forwards}
+@keyframes float{0%{opacity:0;transform:translate(0,15px) scale(.35) rotate(-15deg)}12%{opacity:.98}72%{opacity:.9}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.25) rotate(24deg)}}
+.sound-hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font:11px/1.4 Arial,sans-serif;color:#d8c39b99;opacity:0;transition:opacity .4s;pointer-events:none;text-align:center;white-space:nowrap}
+.sound-hint.show{opacity:1}
+@media(max-aspect-ratio:2/3){.stage{width:100vw;height:150vw;max-height:100vh;max-width:66.6667vh}}
+@media(prefers-reduced-motion:reduce){.poster{transition:none}.heart{animation:none;display:none}}
 </style>
 </head>
 <body>
-<main class="stage">
- <div class="poster">
-  <img src="./invitation-poster.jpg" alt="Kourosh birthday invitation with Kourosh and his golden retriever">
-  <button class="head-hover" type="button" aria-label="Show hearts around Kourosh" onclick="this.classList.toggle('active')">
-   <span class="hearts" aria-hidden="true"><span class="heart">♥</span><span class="heart">♥</span><span class="heart">♥</span></span>
-  </button>
-  <a class="map-link" href="https://maps.app.goo.gl/eUVVCWLukF2RhRGx8" target="_blank" rel="noopener" aria-label="Open Café Lovent location in Google Maps" title="Open Café Lovent in Maps"></a>
- </div>
+<main class="stage" id="stage" aria-label="Kourosh birthday invitation">
+<img class="poster" src="invitation-poster.png" alt="Kourosh's birthday invitation with Koko. Friday 15 Aban 1405, 8 PM, Café Lovent. Hosted with love by Merat.">
+<div class="portrait-hotspot" id="portrait" aria-label="Hover over Kourosh's photo for floating hearts" tabindex="0"></div>
+<a class="map-hotspot" href="https://maps.app.goo.gl/eUVVCWLukF2RhRGx8" target="_blank" rel="noopener" aria-label="Open Café Lovent location in Google Maps"></a>
 </main>
-<audio id="bgmusic" autoplay loop preload="auto" playsinline>
- <source src="./Learning-To-Fly.mp3" type="audio/mpeg">
-</audio>
+<audio id="music" autoplay loop preload="auto" playsinline><source src="Learning-To-Fly.mp3" type="audio/mpeg"></audio>
+<div id="hint" class="sound-hint">Your browser may require one tap to allow music.</div>
 <script>
-(()=>{const a=document.getElementById('bgmusic');a.volume=.72;
-const start=()=>{const p=a.play();if(p&&p.catch)p.catch(()=>{});};
-start();
-['pointerdown','touchstart','keydown'].forEach(evt=>window.addEventListener(evt,start,{once:true,passive:true}));
+(()=>{
+ const stage=document.getElementById('stage'), portrait=document.getElementById('portrait'), audio=document.getElementById('music'), hint=document.getElementById('hint');
+ audio.volume=.78;
+ const attemptPlay=()=>audio.play().then(()=>hint.classList.remove('show')).catch(()=>hint.classList.add('show'));
+ attemptPlay(); window.addEventListener('load',attemptPlay,{once:true});
+ ['pointerdown','touchstart','keydown'].forEach(evt=>window.addEventListener(evt,attemptPlay,{once:true,passive:true}));
+ let active=false,timer=null;
+ function burst(){
+  for(let i=0;i<26;i++){
+   const heart=document.createElement('span');heart.className='heart';heart.textContent=Math.random()>.2?'♥':'♡';
+   heart.style.setProperty('--x',(3+Math.random()*94)+'vw');heart.style.setProperty('--y',(4+Math.random()*88)+'vh');
+   heart.style.setProperty('--size',(16+Math.random()*34)+'px');heart.style.setProperty('--dur',(2.1+Math.random()*2.4)+'s');
+   heart.style.setProperty('--dx',(-90+Math.random()*180)+'px');heart.style.setProperty('--dy',(-110-Math.random()*230)+'px');
+   document.body.appendChild(heart);heart.addEventListener('animationend',()=>heart.remove(),{once:true});
+  }
+ }
+ function start(){if(active)return;active=true;stage.classList.add('is-active');burst();timer=setInterval(burst,700)}
+ function stop(){active=false;stage.classList.remove('is-active');clearInterval(timer)}
+ portrait.addEventListener('pointerenter',start);portrait.addEventListener('pointerleave',stop);
+ portrait.addEventListener('focus',start);portrait.addEventListener('blur',stop);
+ portrait.addEventListener('touchstart',()=>{start();setTimeout(stop,3200)},{passive:true});
 })();
 </script>
 </body>
